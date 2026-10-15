@@ -21,29 +21,46 @@ public class VentanaVerUsuarios extends JFrame {
     }
 
     private void initComponents() {
-        setTitle("Reporte General de Usuarios - Azure MySQL");
-        setSize(1050, 520);
+        setTitle("Reporte General de Usuarios - Sistema Seguro");
+        setSize(1100, 580);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
+        // Panel Superior con Estilo
         JPanel panelNorte = new JPanel(new BorderLayout());
-        JLabel lblTitulo = new JLabel("Listado de Usuarios Registrados en Base de Datos", SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        lblTitulo.setBorder(BorderFactory.createEmptyBorder(15, 0, 10, 0));
+        panelNorte.setBackground(new Color(245, 247, 250));
+        panelNorte.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+
+        JLabel lblTitulo = new JLabel("Listado General de Usuarios Registrados", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblTitulo.setForeground(new Color(44, 62, 80));
+        lblTitulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0));
         panelNorte.add(lblTitulo, BorderLayout.NORTH);
 
-        JPanel panelFiltro = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        panelFiltro.add(new JLabel("Filtrar por Código ID:"));
+        // Panel del Buscador / Filtro
+        JPanel panelFiltro = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 5));
+        panelFiltro.setBackground(new Color(245, 247, 250));
 
-        txtFiltroCodigo = new JTextField(15);
+        JLabel lblFiltro = new JLabel("Filtrar por Código ID:");
+        lblFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        panelFiltro.add(lblFiltro);
+
+        txtFiltroCodigo = new JTextField(18);
+        txtFiltroCodigo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         panelFiltro.add(txtFiltroCodigo);
 
         btnFiltrar = new JButton("Buscar");
+        btnFiltrar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnFiltrar.setBackground(new Color(41, 128, 185));
+        btnFiltrar.setForeground(Color.WHITE);
+        btnFiltrar.setFocusPainted(false);
         btnFiltrar.addActionListener(e -> filtrarPorCodigo());
         panelFiltro.add(btnFiltrar);
 
         btnVerTodos = new JButton("Mostrar Todos");
+        btnVerTodos.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        btnVerTodos.setFocusPainted(false);
         btnVerTodos.addActionListener(e -> {
             txtFiltroCodigo.setText("");
             cargarDatosTabla(null);
@@ -53,10 +70,11 @@ public class VentanaVerUsuarios extends JFrame {
         panelNorte.add(panelFiltro, BorderLayout.SOUTH);
         add(panelNorte, BorderLayout.NORTH);
 
+        // Configuración de la Tabla
         modeloTabla = new DefaultTableModel();
         String[] columnas = {
             "ID", "Código ID", "Usuario", "Rol", "Nombre", "Apellido", 
-            "Correo", "Género", "Depto.", "Puesto", "Estatus", 
+            "Correo", "Acerca de", "Género", "Depto.", "Puesto", "Estatus", 
             "Teléfono (AES)", "Salario (AES)", "Dirección (AES)"
         };
         for (String col : columnas) {
@@ -64,15 +82,28 @@ public class VentanaVerUsuarios extends JFrame {
         }
 
         tablaUsuarios = new JTable(modeloTabla);
+        tablaUsuarios.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        tablaUsuarios.setRowHeight(25);
+        tablaUsuarios.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        tablaUsuarios.getTableHeader().setBackground(new Color(230, 235, 240));
         tablaUsuarios.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        
         JScrollPane scrollPane = new JScrollPane(tablaUsuarios);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
         add(scrollPane, BorderLayout.CENTER);
 
-        JPanel panelSur = new JPanel();
-        panelSur.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        // Panel Inferior con Botón de Cierre
+        JPanel panelSur = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelSur.setBackground(new Color(245, 247, 250));
+        panelSur.setBorder(BorderFactory.createEmptyBorder(10, 0, 15, 0));
+
         btnRegresar = new JButton("Cerrar Ventana");
+        btnRegresar.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnRegresar.setPreferredSize(new Dimension(150, 35));
+        btnRegresar.setFocusPainted(false);
         btnRegresar.addActionListener(e -> this.dispose());
         panelSur.add(btnRegresar);
+
         add(panelSur, BorderLayout.SOUTH);
     }
 

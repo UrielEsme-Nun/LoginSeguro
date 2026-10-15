@@ -14,52 +14,57 @@ public class VentanaCRUDUsuarios extends JFrame {
     }
 
     private void initComponents() {
-        setTitle("Gestión y CRUD de Usuarios - Panel Administrador");
-        setSize(420, 340);
+        setTitle("Panel de Administración CRUD");
+        setSize(480, 420);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(null);
+        setLayout(new BorderLayout());
 
         JPanel panel = new JPanel();
-        panel.setBackground(new Color(52, 73, 94));
-        panel.setBounds(0, 0, 420, 340);
+        panel.setBackground(new Color(44, 62, 80));
         panel.setLayout(null);
 
         JLabel lblTitulo = new JLabel("Panel de Administración CRUD", SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblTitulo.setForeground(Color.WHITE);
-        lblTitulo.setBounds(35, 25, 350, 30);
+        lblTitulo.setBounds(40, 30, 400, 30);
         panel.add(lblTitulo);
 
         // Botón Agregar
         btnAgregar = new JButton("Agregar Nuevo Usuario");
         btnAgregar.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnAgregar.setBounds(60, 80, 300, 40);
+        btnAgregar.setBounds(50, 95, 380, 45);
+        btnAgregar.setFocusPainted(false);
         btnAgregar.addActionListener(e -> abrirFormularioAgregar());
         panel.add(btnAgregar);
 
         // Botón Modificar
         btnModificar = new JButton("Modificar Usuario por Código ID");
         btnModificar.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnModificar.setBounds(60, 135, 300, 40);
+        btnModificar.setBounds(50, 160, 380, 45);
+        btnModificar.setFocusPainted(false);
         btnModificar.addActionListener(e -> solicitarIdParaModificar());
         panel.add(btnModificar);
 
         // Botón Eliminar
         btnEliminar = new JButton("Eliminar Usuario por Código ID");
         btnEliminar.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnEliminar.setBounds(60, 190, 300, 40);
+        btnEliminar.setBounds(50, 225, 380, 45);
+        btnEliminar.setFocusPainted(false);
         btnEliminar.addActionListener(e -> solicitarIdParaEliminar());
         panel.add(btnEliminar);
 
         // Botón Regresar
         btnRegresar = new JButton("Regresar al Menú");
-        btnRegresar.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btnRegresar.setBounds(110, 255, 200, 30);
+        btnRegresar.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnRegresar.setBackground(new Color(127, 140, 141));
+        btnRegresar.setForeground(Color.WHITE);
+        btnRegresar.setFocusPainted(false);
+        btnRegresar.setBounds(50, 300, 380, 40);
         btnRegresar.addActionListener(e -> this.dispose());
         panel.add(btnRegresar);
 
-        add(panel);
+        add(panel, BorderLayout.CENTER);
     }
 
     private void abrirFormularioAgregar() {
@@ -71,7 +76,7 @@ public class VentanaCRUDUsuarios extends JFrame {
         String codigo = JOptionPane.showInputDialog(this, "Ingrese el Código ID del usuario a modificar:", "Modificar Usuario", JOptionPane.QUESTION_MESSAGE);
         if (codigo != null && !codigo.trim().isEmpty()) {
             UsuarioDAO dao = new UsuarioDAO();
-            Map<String, String> datos = dao.obtenerUsuarioPorCodigo(codigo.trim());
+            Map<String, String> datos = dao.obtenerUsuarioPorCodigoCompleto(codigo.trim());
             
             if (datos.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "El Código ID '" + codigo.trim() + "' no existe en la base de datos.", "No encontrado", JOptionPane.WARNING_MESSAGE);

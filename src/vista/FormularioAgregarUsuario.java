@@ -1,13 +1,16 @@
 package vista;
 
+import dao.UsuarioDAO;
 import javax.swing.*;
 import java.awt.*;
+import java.util.regex.Pattern;
 
 public class FormularioAgregarUsuario extends JFrame {
 
-    private JTextField txtCodigoId, txtUsuario, txtRol, txtNombre, txtApellido, txtCorreo, txtFechaNac, txtGenero, txtDepto, txtPuesto;
+    private JTextField txtCodigoId, txtUsuario, txtNombre, txtApellido, txtCorreo, txtFechaNac, txtGenero, txtDepto, txtPuesto;
     private JPasswordField txtPassword;
-    private JTextField txtTelefono, txtSalario, txtDireccion; // Datos que irán cifrados con AES_ENCRYPT
+    private JTextField txtTelefono, txtSalario, txtDireccion, txtAcercaDe;
+    private JComboBox<String> cmbRol, cmbEstatus;
     private JButton btnGuardar, btnCancelar;
 
     public FormularioAgregarUsuario(JFrame parent) {
@@ -15,86 +18,110 @@ public class FormularioAgregarUsuario extends JFrame {
     }
 
     private void initComponents() {
-        setTitle("Registrar Nuevo Usuario - Azure MySQL");
-        setSize(520, 680);
+        setTitle("Registrar Nuevo Usuario - Sistema Seguro");
+        setSize(650, 750);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(null);
+        setLayout(new BorderLayout());
 
-        JLabel lblTitulo = new JLabel("Ingrese los datos del nuevo usuario", SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblTitulo.setBounds(40, 15, 420, 30);
-        add(lblTitulo);
+        // Panel Principal con diseño limpio y moderno
+        JPanel panelPrincipal = new JPanel(new GridBagLayout());
+        panelPrincipal.setBackground(new Color(245, 247, 250));
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        int y = 60;
-        int salto = 38;
+        // Título Superior
+        JLabel lblTitulo = new JLabel("Registro de Nuevo Usuario", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblTitulo.setForeground(new Color(41, 128, 185));
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        panelPrincipal.add(lblTitulo, gbc);
 
-        txtCodigoId = agregarCampo("Código ID Único:", y);
-        y += salto;
-        txtUsuario = agregarCampo("Nombre de Usuario:", y);
-        y += salto;
+        gbc.gridwidth = 1; // Restaurar ancho
+        int fila = 1;
+
+        // Campos del formulario
+        txtCodigoId = agregarCampoFila(panelPrincipal, gbc, fila++, "Código ID (Máx. 50):", 50);
+        txtUsuario = agregarCampoFila(panelPrincipal, gbc, fila++, "Nombre de Usuario (Máx. 50):", 50);
         
-        // Campo Contraseña (SHA-2)
-        JLabel lblPass = new JLabel("Contraseña:");
-        lblPass.setBounds(40, y, 160, 25);
-        add(lblPass);
-        txtPassword = new JPasswordField();
-        txtPassword.setBounds(210, y, 250, 25);
-        add(txtPassword);
-        y += salto;
+        // Contraseña
+        gbc.gridx = 0; gbc.gridy = fila;
+        panelPrincipal.add(new JLabel("Contraseña:"), gbc);
+        txtPassword = new JPasswordField(20);
+        gbc.gridx = 1;
+        panelPrincipal.add(txtPassword, gbc);
+        fila++;
 
-        txtRol = agregarCampo("Rol (administrador/empleado):", y);
-        y += salto;
-        txtNombre = agregarCampo("Primer Nombre:", y);
-        y += salto;
-        txtApellido = agregarCampo("Apellido:", y);
-        y += salto;
-        txtCorreo = agregarCampo("Correo Electrónico:", y);
-        y += salto;
-        txtFechaNac = agregarCampo("F. Nacimiento (YYYY-MM-DD):", y);
-        y += salto;
-        txtGenero = agregarCampo("Género:", y);
-        y += salto;
-        txtDepto = agregarCampo("Departamento:", y);
-        y += salto;
-        txtPuesto = agregarCampo("Puesto:", y);
-        y += salto;
+        // Rol (JComboBox para evitar incongruencias)
+        gbc.gridx = 0; gbc.gridy = fila;
+        panelPrincipal.add(new JLabel("Rol del Sistema:"), gbc);
+        cmbRol = new JComboBox<>(new String[]{"empleado", "administrador"});
+        gbc.gridx = 1;
+        panelPrincipal.add(cmbRol, gbc);
+        fila++;
+
+        txtNombre = agregarCampoFila(panelPrincipal, gbc, fila++, "Primer Nombre:", 50);
+        txtApellido = agregarCampoFila(panelPrincipal, gbc, fila++, "Apellido:", 50);
+        txtCorreo = agregarCampoFila(panelPrincipal, gbc, fila++, "Correo Electrónico:", 100);
+        txtFechaNac = agregarCampoFila(panelPrincipal, gbc, fila++, "F. Nacimiento (YYYY-MM-DD):", 10);
+        txtGenero = agregarCampoFila(panelPrincipal, gbc, fila++, "Género:", 20);
+        txtDepto = agregarCampoFila(panelPrincipal, gbc, fila++, "Departamento:", 50);
+        txtPuesto = agregarCampoFila(panelPrincipal, gbc, fila++, "Puesto:", 50);
         
-        // Datos Sensibles (Cifrados con AES_ENCRYPT)
-        txtTelefono = agregarCampo("Teléfono (Cifrar AES):", y);
-        y += salto;
-        txtSalario = agregarCampo("Salario (Cifrar AES):", y);
-        y += salto;
-        txtDireccion = agregarCampo("Dirección (Cifrar AES):", y);
+        // Datos Sensibles (AES)
+        txtTelefono = agregarCampoFila(panelPrincipal, gbc, fila++, "Teléfono (Solo números):", 20);
+        txtSalario = agregarCampoFila(panelPrincipal, gbc, fila++, "Salario (Ej. 15000.00):", 20);
+        txtDireccion = agregarCampoFila(panelPrincipal, gbc, fila++, "Dirección:", 255);
+        txtAcercaDe = agregarCampoFila(panelPrincipal, gbc, fila++, "Acerca de (Opcional):", 255);
 
-        // Botones
-        y += 50;
-        btnGuardar = new JButton("Guardar en BD");
-        btnGuardar.setBounds(120, y, 130, 35);
-        btnGuardar.addActionListener(e -> guardarUsuarioBD());
-        add(btnGuardar);
+        // Estatus
+        gbc.gridx = 0; gbc.gridy = fila;
+        panelPrincipal.add(new JLabel("Estatus:"), gbc);
+        cmbEstatus = new JComboBox<>(new String[]{"Activo", "Inactivo", "Suspendido"});
+        gbc.gridx = 1;
+        panelPrincipal.add(cmbEstatus, gbc);
+        fila++;
+
+        JScrollPane scrollPane = new JScrollPane(panelPrincipal);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        add(scrollPane, BorderLayout.CENTER);
+
+        // Panel de Botones Inferior
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
+        panelBotones.setBackground(new Color(230, 235, 240));
+
+        btnGuardar = new JButton("Guardar Usuario");
+        btnGuardar.setBackground(new Color(39, 174, 96));
+        btnGuardar.setForeground(Color.WHITE);
+        btnGuardar.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnGuardar.setPreferredSize(new Dimension(150, 35));
+        btnGuardar.addActionListener(e -> validarYGuardar());
+        panelBotones.add(btnGuardar);
 
         btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBounds(270, y, 110, 35);
+        btnCancelar.setPreferredSize(new Dimension(110, 35));
         btnCancelar.addActionListener(e -> this.dispose());
-        add(btnCancelar);
+        panelBotones.add(btnCancelar);
+
+        add(panelBotones, BorderLayout.SOUTH);
     }
 
-    private JTextField agregarCampo(String etiqueta, int y) {
-        JLabel lbl = new JLabel(etiqueta);
-        lbl.setBounds(40, y, 160, 25);
-        add(lbl);
-        JTextField txt = new JTextField();
-        txt.setBounds(210, y, 250, 25);
-        add(txt);
+    private JTextField agregarCampoFila(JPanel panel, GridBagConstraints gbc, int fila, String etiqueta, int columnas) {
+        gbc.gridx = 0; gbc.gridy = fila;
+        panel.add(new JLabel(etiqueta), gbc);
+        JTextField txt = new JTextField(20);
+        gbc.gridx = 1;
+        panel.add(txt, gbc);
         return txt;
     }
 
-    private void guardarUsuarioBD() {
+    private void validarYGuardar() {
         String codigo = txtCodigoId.getText().trim();
         String usuario = txtUsuario.getText().trim();
         String password = new String(txtPassword.getPassword()).trim();
-        String rol = txtRol.getText().trim();
+        String rol = (String) cmbRol.getSelectedItem();
         String nombre = txtNombre.getText().trim();
         String apellido = txtApellido.getText().trim();
         String correo = txtCorreo.getText().trim();
@@ -105,23 +132,61 @@ public class FormularioAgregarUsuario extends JFrame {
         String telefono = txtTelefono.getText().trim();
         String salario = txtSalario.getText().trim();
         String direccion = txtDireccion.getText().trim();
+        String acercaDe = txtAcercaDe.getText().trim();
+        String estatus = (String) cmbEstatus.getSelectedItem();
 
-        if (codigo.isEmpty() || usuario.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Los campos Código ID, Usuario y Contraseña son obligatorios.", "Campos vacíos", JOptionPane.WARNING_MESSAGE);
+        // VALIDACIONES ESTRICTAS DE INTEGRIDAD
+        if (codigo.isEmpty() || usuario.isEmpty() || password.isEmpty() || nombre.isEmpty() || apellido.isEmpty() || correo.isEmpty() || telefono.isEmpty() || salario.isEmpty() || direccion.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor, complete todos los campos obligatorios.", "Campos incompletos", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Invocación al DAO real para insertar en la base de datos de Azure
-        dao.UsuarioDAO usuarioDao = new dao.UsuarioDAO();
-        boolean exito = usuarioDao.registrarUsuario(codigo, usuario, password, rol, nombre, apellido, 
-                                                   correo, fechaNac, genero, depto, puesto, 
-                                                   telefono, salario, direccion);
+        if (codigo.length() > 50 || usuario.length() > 50) {
+            JOptionPane.showMessageDialog(this, "El Código ID y el Usuario no pueden exceder los 50 caracteres.", "Error de longitud", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Validación de formato de correo electrónico
+        if (!Pattern.matches("^[A-Za-z0-9+_.-]+@(.+)$", correo)) {
+            JOptionPane.showMessageDialog(this, "El formato del correo electrónico no es válido.", "Validación de Correo", JOptionPane.WARNING_MESSAGE);
+            txtCorreo.requestFocus();
+            return;
+        }
+
+        // Validación de formato de fecha YYYY-MM-DD
+        if (!fechaNac.isEmpty() && !Pattern.matches("^\\d{4}-\\d{2}-\\d{2}$", fechaNac)) {
+            JOptionPane.showMessageDialog(this, "La fecha de nacimiento debe tener el formato estricto: YYYY-MM-DD", "Formato de Fecha Inválido", JOptionPane.WARNING_MESSAGE);
+            txtFechaNac.requestFocus();
+            return;
+        }
+
+        // Validación de Teléfono (Solo números y longitud adecuada)
+        if (!Pattern.matches("^\\d+$", telefono)) {
+            JOptionPane.showMessageDialog(this, "El teléfono solo debe contener números.", "Formato Inválido", JOptionPane.WARNING_MESSAGE);
+            txtTelefono.requestFocus();
+            return;
+        }
+
+        // Validación de Salario (Numérico decimal)
+        try {
+            Double.parseDouble(salario);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "El salario debe ser un valor numérico válido (ej. 12500.50).", "Formato Inválido", JOptionPane.WARNING_MESSAGE);
+            txtSalario.requestFocus();
+            return;
+        }
+
+        // Invocación al DAO real
+        UsuarioDAO usuarioDao = new UsuarioDAO();
+        boolean exito = usuarioDao.registrarUsuarioCompleto(codigo, usuario, password, rol, nombre, apellido, 
+                                                             correo, acercaDe, telefono, salario, direccion, 
+                                                             fechaNac, genero, depto, puesto, estatus);
 
         if (exito) {
-            JOptionPane.showMessageDialog(this, "¡Usuario registrado y cifrado correctamente en Azure MySQL!");
+            JOptionPane.showMessageDialog(this, "¡Usuario registrado y protegido con éxito en Azure MySQL!");
             this.dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Error al registrar el usuario. Verifique que el Código ID o el Usuario no estén repetidos.", "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error al registrar. Verifique que el Código ID o Usuario no estén duplicados.", "Error en Base de Datos", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
